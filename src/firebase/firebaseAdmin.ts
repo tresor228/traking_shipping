@@ -240,4 +240,3 @@ export async function sendPackageUpdateNotification(
     console.error('Erreur lors de l\'envoi de la notification de mise à jour de colis:', error);
     throw error;
   }
-}
