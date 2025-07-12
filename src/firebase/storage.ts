@@ -9,7 +9,7 @@ import {
   getMetadata,
   UploadTask
 } from 'firebase/storage';
-import { storage } from './firebaseConfig';
+import { storage } from './config';
 
 // Interface pour les métadonnées de fichier
 export interface FileMetadata {
@@ -224,4 +224,4 @@ export function generateUniqueFileName(originalName: string): string {
 // Constantes pour les validations
 export const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 export const ALLOWED_DOCUMENT_TYPES = ['application/pdf', 'image/jpeg', 'image/png'];
-export const MAX_FILE_SIZE_MB = 10; // 10MB max par fichier
+export const MAX_FILE_SIZE_MB = 10; // 10MB max par fichierAuth

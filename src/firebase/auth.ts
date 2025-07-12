@@ -9,7 +9,7 @@ import {
   UserCredential
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { auth, db } from './firebaseConfig';
+import { auth, db } from './config';
 
 // Interface pour les données utilisateur
 export interface UserData {

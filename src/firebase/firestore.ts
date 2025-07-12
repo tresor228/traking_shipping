@@ -16,7 +16,7 @@ import {
   QuerySnapshot,
   DocumentData
 } from 'firebase/firestore';
-import { db } from './firebaseConfig';
+import { db } from './config';
 
 // Interface pour les colis
 export interface Package {
