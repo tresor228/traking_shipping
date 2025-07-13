@@ -4,10 +4,10 @@
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { generateHDId } from "@/utils/generateID";
-import { formatFrenchDate } from "@/utils/formatDate";
-import { createUserWithEmailAndPassword } from "@/firebase/auth";
-import { createUserDocument } from "@/firebase/firestore";
+import { generateUserId } from "@/utils/formatDate";
+import { formatDate } from "@/utils/generateID";
+import { createUserAccount } from "@/firebase/auth";
+import { createUserDocument } from "@/firebase/firestore"; // L'import est correct
 import { useAuth } from "@/context/authContext";
 
 interface FormData {
@@ -193,13 +193,15 @@ export default function Inscription() {
     setErrors({});
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(
+      const userCredential = await createUserAccount(
         formData.email.trim(),
-        formData.password
+        formData.password,
+        formData.nom.trim() + ' ' + formData.prenom.trim(),
+        "user"
       );
       
-      const userId = generateHDId();
-      const registrationDate = formatFrenchDate(new Date());
+      const userId = generateUserId();
+      const registrationDate = formatDate(new Date());
       
       const userDocumentData = {
         userId,

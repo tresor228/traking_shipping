@@ -14,7 +14,8 @@ import {
   Timestamp,
   onSnapshot,
   QuerySnapshot,
-  DocumentData
+  DocumentData,
+  setDoc
 } from 'firebase/firestore';
 import { db } from './config';
 
@@ -64,8 +65,8 @@ export async function createPackage(packageData: Omit<Package, 'id' | 'createdAt
   try {
     const newPackage = {
       ...packageData,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now()
     };
     
     const docRef = await addDoc(collection(db, 'packages'), newPackage);
@@ -148,7 +149,7 @@ export async function updatePackage(packageId: string, updates: Partial<Package>
     const docRef = doc(db, 'packages', packageId);
     await updateDoc(docRef, {
       ...updates,
-      updatedAt: new Date()
+      updatedAt: Timestamp.now()
     });
   } catch (error) {
     console.error('Erreur lors de la mise à jour du colis:', error);
@@ -173,7 +174,7 @@ export async function addTrackingHistory(historyData: Omit<TrackingHistory, 'id'
   try {
     const newHistory = {
       ...historyData,
-      timestamp: new Date()
+      timestamp: Timestamp.now()
     };
     
     const docRef = await addDoc(collection(db, 'trackingHistory'), newHistory);
@@ -204,7 +205,7 @@ export async function getTrackingHistory(packageId: string): Promise<TrackingHis
 // === FONCTIONS D'ÉCOUTE EN TEMPS RÉEL ===
 
 // Écouter les changements d'un colis
-export function subscribeToPackage(packageId: string, callback: (package: Package | null) => void): () => void {
+export function subscribeToPackage(packageId: string, callback: (pkg: Package | null) => void): () => void {
   const docRef = doc(db, 'packages', packageId);
   
   return onSnapshot(docRef, (doc) => {
@@ -249,6 +250,43 @@ export async function getPackageStats() {
     return stats;
   } catch (error) {
     console.error('Erreur lors du calcul des statistiques:', error);
+    throw error;
+  }
+}
+
+// === FONCTIONS POUR LES UTILISATEURS ===
+
+/**
+ * Recherche un utilisateur par son identifiant HD (trackingId)
+ * @param hdId L'identifiant HD (ex: HD001)
+ * @returns L'objet utilisateur (contenant au moins l'email) ou null si non trouvé
+ */
+export async function getUserByHDId(hdId: string): Promise<{ email: string } | null> {
+  try {
+    const q = query(collection(db, 'users'), where('trackingId', '==', hdId), limit(1));
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+      const userDoc = querySnapshot.docs[0];
+      const data = userDoc.data();
+      return { email: data.email };
+    }
+    return null;
+  } catch (error) {
+    console.error('Erreur lors de la recherche utilisateur par HDId:', error);
+    throw error;
+  }
+}
+
+/**
+ * Crée un document utilisateur dans Firestore avec un userId (HDId) et les infos nécessaires
+ * @param uid L'identifiant Firebase Auth de l'utilisateur
+ * @param data Les données utilisateur à enregistrer (doit contenir userId, email, nom, prenom, etc.)
+ */
+export async function createUserDocument(uid: string, data: any): Promise<void> {
+  try {
+    await setDoc(doc(db, 'users', uid), data);
+  } catch (error) {
+    console.error('Erreur lors de la création du document utilisateur:', error);
     throw error;
   }
 }

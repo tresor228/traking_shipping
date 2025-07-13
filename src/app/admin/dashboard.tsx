@@ -2,20 +2,46 @@ import React, { useState, useEffect } from 'react';
 import { Package, Plus, Search, Filter, Eye, Edit2, Trash2 } from 'lucide-react';
 
 export default function AdminDashboard() {
-  const [packages, setPackages] = useState([]);
-  const [filteredPackages, setFilteredPackages] = useState([]);
+  type PackageType = {
+    id: string;
+    trackingNumber: string;
+    userId: string;
+    origin: string;
+    destination: string;
+    status: 'pending' | 'in-transit' | 'customs' | 'delivered';
+    transportType: 'maritime' | 'aerien';
+    estimatedDelivery: string;
+    currentLocation?: string;
+  };
+
+  const [packages, setPackages] = useState<PackageType[]>([]);
+  const [filteredPackages, setFilteredPackages] = useState<PackageType[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [transportFilter, setTransportFilter] = useState('all');
 
-  // TODO: Implémenter la récupération des colis depuis Firebase
+  // Initialisation des colis avec les données mock
   useEffect(() => {
-    // fetchPackages();
+    setPackages(mockPackages);
   }, []);
 
-  // TODO: Implémenter la recherche et filtrage
+  // Recherche et filtrage
   useEffect(() => {
-    // filterPackages();
+    let filtered = packages;
+    if (searchTerm.trim() !== '') {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(pkg =>
+        pkg.trackingNumber.toLowerCase().includes(term) ||
+        pkg.userId.toLowerCase().includes(term)
+      );
+    }
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(pkg => pkg.status === statusFilter);
+    }
+    if (transportFilter !== 'all') {
+      filtered = filtered.filter(pkg => pkg.transportType === transportFilter);
+    }
+    setFilteredPackages(filtered);
   }, [searchTerm, statusFilter, transportFilter, packages]);
 
   const stats = [
@@ -25,7 +51,7 @@ export default function AdminDashboard() {
     { title: 'En Attente', value: '12', color: 'bg-red-500' }
   ];
 
-  const mockPackages = [
+  const mockPackages: PackageType[] = [
     {
       id: '1',
       trackingNumber: 'CHN123456789',
@@ -50,7 +76,7 @@ export default function AdminDashboard() {
     }
   ];
 
-  const getStatusBadge = (status) => {
+  const getStatusBadge = (status: 'pending' | 'in-transit' | 'customs' | 'delivered') => {
     const statusConfig = {
       'pending': { color: 'bg-gray-100 text-gray-800', text: 'En attente' },
       'in-transit': { color: 'bg-blue-100 text-blue-800', text: 'En transit' },
@@ -65,7 +91,7 @@ export default function AdminDashboard() {
     );
   };
 
-  const getTransportIcon = (type) => {
+  const getTransportIcon = (type: 'maritime' | 'aerien') => {
     return type === 'maritime' ? '🚢' : '✈️';
   };
 
@@ -183,7 +209,8 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {mockPackages.map((pkg) => (
+                {/* Affichage des colis filtrés */}
+                {filteredPackages.map((pkg) => (
                   <tr key={pkg.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
