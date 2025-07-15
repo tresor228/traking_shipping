@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { generateUserId } from "@/utils/formatDate";
 import { formatDate } from "@/utils/generateID";
 import { useAuth } from "@/context/authContext";
+import { createUserAccount } from '@/firebase/auth';
 
 interface FormData {
   nom: string;
@@ -184,37 +185,22 @@ export default function Inscription() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!validateForm()) return;
-    
     setLoading(true);
     setErrors({});
-
     try {
-      const userId = generateUserId();
-      const registrationDate = formatDate(new Date());
-      
-      const userDocumentData = {
-        userId,
-        nom: formData.nom.trim(),
-        prenom: formData.prenom.trim(),
-        telephone: formData.telephone.trim(),
-        email: formData.email.trim(),
-        registrationDate,
-        role: "user",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      
-      setUserData({ userId, registrationDate });
-      setStep(2);
-      
+      // Création du compte Firebase
+      await createUserAccount(
+        formData.email.trim(),
+        formData.password,
+        `${formData.prenom.trim()} ${formData.nom.trim()}`,
+        'user'
+      );
+      // Redirection après succès
+      router.push('/user/dashboard');
     } catch (error: unknown) {
       console.error("Erreur d'inscription:", error);
-      
       let errorMessage = "Erreur lors de la création du compte";
-      
-      // Gestion étendue des erreurs Firebase
       if (error && typeof error === 'object' && 'code' in error && 'message' in error) {
         const err = error as { code: string; message: string };
         switch (err.code) {
@@ -242,10 +228,9 @@ export default function Inscription() {
           default:
             errorMessage = `Erreur: ${err.message}`;
         }
-      } else {
-        errorMessage = `Erreur inconnue: ${errorMessage}`;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
       }
-      
       setErrors({ general: errorMessage });
     } finally {
       setLoading(false);
