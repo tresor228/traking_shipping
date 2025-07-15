@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import { generateUserId } from "@/utils/formatDate";
 import { formatDate } from "@/utils/generateID";
 import { createUserAccount } from "@/firebase/auth";
-import { createUserDocument } from "@/firebase/firestore"; // L'import est correct
 import { useAuth } from "@/context/authContext";
 
 interface FormData {
@@ -214,8 +213,6 @@ export default function Inscription() {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      
-      await createUserDocument(userCredential.user.uid, userDocumentData);
       
       setUserData({ userId, registrationDate });
       setStep(2);

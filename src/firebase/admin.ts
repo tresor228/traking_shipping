@@ -196,7 +196,7 @@ export async function sendNotificationToAll(notification: NotificationData) {
       tokens: tokens,
     };
 
-    const response = await adminMessaging.sendMulticast(message);
+    const response = await adminMessaging.sendEachForMulticast(message);
     return response;
   } catch (error) {
     console.error('Erreur lors de l\'envoi des notifications:', error);

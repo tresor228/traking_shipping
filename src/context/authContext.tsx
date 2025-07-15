@@ -4,17 +4,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { User, onAuthStateChanged, signOut as firebaseSignOut } from "firebase/auth";
 import { auth } from "@/firebase/config";
-import { getUserData } from "@/firebase/firestore";
-
-export interface UserData {
-  userId: string;
-  nom: string;
-  prenom: string;
-  email: string;
-  telephone: string;
-  role: "user" | "admin";
-  registrationDate: string;
-}
+import { getUserData, UserData } from "@/firebase/auth";
 
 interface AuthContextType {
   user: User | null;
