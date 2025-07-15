@@ -1,7 +1,7 @@
 // src/context/authContext.tsx
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
 import { User, onAuthStateChanged, signOut as firebaseSignOut } from "firebase/auth";
 import { auth } from "@/firebase/config";
 import { getUserData, UserData } from "@/firebase/auth";
@@ -34,8 +34,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const refreshUserData = async () => {
+  const refreshUserData = useCallback(async () => {
     if (user) {
+      setLoading(true);
       try {
         const data = await getUserData(user.uid);
         setUserData(data);
@@ -43,8 +44,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         console.error("Erreur lors de la récupération des données utilisateur:", error);
         setUserData(null);
       }
+      setLoading(false);
     }
-  };
+  }, [user]);
 
   const signOut = async () => {
     try {
@@ -60,24 +62,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
-      
       if (user) {
         await refreshUserData();
       } else {
         setUserData(null);
       }
-      
       setLoading(false);
     });
-
     return unsubscribe;
-  }, []);
+  }, [refreshUserData]);
 
   useEffect(() => {
     if (user) {
       refreshUserData();
     }
-  }, [user]);
+  }, [user, refreshUserData]);
 
   const value: AuthContextType = {
     user,

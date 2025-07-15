@@ -7,7 +7,6 @@ import {
   deleteObject,
   listAll,
   getMetadata,
-  UploadTask
 } from 'firebase/storage';
 import { storage } from './config';
 

@@ -13,8 +13,6 @@ import {
   limit,
   Timestamp,
   onSnapshot,
-  QuerySnapshot,
-  DocumentData,
   setDoc
 } from 'firebase/firestore';
 import { db } from './config';
@@ -282,7 +280,7 @@ export async function getUserByHDId(hdId: string): Promise<{ email: string } | n
  * @param uid L'identifiant Firebase Auth de l'utilisateur
  * @param data Les données utilisateur à enregistrer (doit contenir userId, email, nom, prenom, etc.)
  */
-export async function createUserDocument(uid: string, data: any): Promise<void> {
+export async function createUserDocument(uid: string, data: { trackingId: string; email: string; nom: string; prenom: string; }): Promise<void> {
   try {
     await setDoc(doc(db, 'users', uid), data);
   } catch (error) {

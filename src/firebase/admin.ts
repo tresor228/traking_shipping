@@ -142,9 +142,8 @@ export async function sendNotificationToUser(
   try {
     // Récupérer le token FCM de l'utilisateur depuis Firestore
     const userDoc = await adminDb.collection('users').doc(uid).get();
-    const userData = userDoc.data();
     
-    if (!userData?.fcmToken) {
+    if (!userDoc.data()?.fcmToken) {
       throw new Error('Token FCM non trouvé pour cet utilisateur');
     }
 
@@ -155,7 +154,7 @@ export async function sendNotificationToUser(
         imageUrl: notification.imageUrl,
       },
       data: notification.data || {},
-      token: userData.fcmToken,
+      token: userDoc.data()?.fcmToken,
     };
 
     const response = await adminMessaging.send(message);
@@ -223,8 +222,7 @@ export async function sendPackageUpdateNotification(
     }
 
     const userDoc = usersSnapshot.docs[0];
-    const userData = userDoc.data();
-
+    
     const notification: NotificationData = {
       title: '📦 Mise à jour de votre colis',
       body: `Votre colis ${packageTrackingNumber} est maintenant ${status}${location ? ` à ${location}` : ''}.`,

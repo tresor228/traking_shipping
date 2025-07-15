@@ -6,7 +6,6 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { generateUserId } from "@/utils/formatDate";
 import { formatDate } from "@/utils/generateID";
-import { createUserAccount } from "@/firebase/auth";
 import { useAuth } from "@/context/authContext";
 
 interface FormData {
@@ -192,13 +191,6 @@ export default function Inscription() {
     setErrors({});
 
     try {
-      const userCredential = await createUserAccount(
-        formData.email.trim(),
-        formData.password,
-        formData.nom.trim() + ' ' + formData.prenom.trim(),
-        "user"
-      );
-      
       const userId = generateUserId();
       const registrationDate = formatDate(new Date());
       
@@ -217,36 +209,41 @@ export default function Inscription() {
       setUserData({ userId, registrationDate });
       setStep(2);
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Erreur d'inscription:", error);
       
       let errorMessage = "Erreur lors de la création du compte";
       
       // Gestion étendue des erreurs Firebase
-      switch (error.code) {
-        case "auth/email-already-in-use":
-          errorMessage = "Cette adresse email est déjà utilisée";
-          break;
-        case "auth/invalid-email":
-          errorMessage = "Format d'email invalide";
-          break;
-        case "auth/weak-password":
-          errorMessage = "Mot de passe trop faible";
-          break;
-        case "auth/network-request-failed":
-          errorMessage = "Problème de connexion réseau. Vérifiez votre connexion.";
-          break;
-        case "auth/too-many-requests":
-          errorMessage = "Trop de tentatives. Veuillez réessayer plus tard.";
-          break;
-        case "auth/operation-not-allowed":
-          errorMessage = "L'inscription par email/mot de passe n'est pas activée";
-          break;
-        case "auth/user-disabled":
-          errorMessage = "Ce compte a été désactivé";
-          break;
-        default:
-          errorMessage = `Erreur: ${error.message}`;
+      if (error && typeof error === 'object' && 'code' in error && 'message' in error) {
+        const err = error as { code: string; message: string };
+        switch (err.code) {
+          case "auth/email-already-in-use":
+            errorMessage = "Cette adresse email est déjà utilisée";
+            break;
+          case "auth/invalid-email":
+            errorMessage = "Format d'email invalide";
+            break;
+          case "auth/weak-password":
+            errorMessage = "Mot de passe trop faible";
+            break;
+          case "auth/network-request-failed":
+            errorMessage = "Problème de connexion réseau. Vérifiez votre connexion.";
+            break;
+          case "auth/too-many-requests":
+            errorMessage = "Trop de tentatives. Veuillez réessayer plus tard.";
+            break;
+          case "auth/operation-not-allowed":
+            errorMessage = "L'inscription par email/mot de passe n'est pas activée";
+            break;
+          case "auth/user-disabled":
+            errorMessage = "Ce compte a été désactivé";
+            break;
+          default:
+            errorMessage = `Erreur: ${err.message}`;
+        }
+      } else {
+        errorMessage = `Erreur inconnue: ${errorMessage}`;
       }
       
       setErrors({ general: errorMessage });

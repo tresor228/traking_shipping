@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Plus, Search, Filter, Eye, Edit2, Trash2 } from 'lucide-react';
+import { Package, Plus, Search, Eye, Edit2, Trash2 } from 'lucide-react';
 
 export default function AdminDashboard() {
   type PackageType = {
@@ -22,6 +22,30 @@ export default function AdminDashboard() {
 
   // Initialisation des colis avec les données mock
   useEffect(() => {
+    const mockPackages: PackageType[] = [
+      {
+        id: '1',
+        trackingNumber: 'CHN123456789',
+        userId: 'HD001',
+        origin: 'Shenzhen, Chine',
+        destination: 'Lagos, Nigeria',
+        status: 'in-transit',
+        transportType: 'maritime',
+        estimatedDelivery: '2024-08-15',
+        currentLocation: 'Port de Cotonou'
+      },
+      {
+        id: '2',
+        trackingNumber: 'CHN987654321',
+        userId: 'HD002',
+        origin: 'Guangzhou, Chine',
+        destination: 'Abidjan, Côte d\'Ivoire',
+        status: 'customs',
+        transportType: 'aerien',
+        estimatedDelivery: '2024-07-20',
+        currentLocation: 'Douanes Abidjan'
+      }
+    ];
     setPackages(mockPackages);
   }, []);
 
@@ -49,31 +73,6 @@ export default function AdminDashboard() {
     { title: 'En Transit', value: '89', color: 'bg-yellow-500' },
     { title: 'Livrés', value: '158', color: 'bg-green-500' },
     { title: 'En Attente', value: '12', color: 'bg-red-500' }
-  ];
-
-  const mockPackages: PackageType[] = [
-    {
-      id: '1',
-      trackingNumber: 'CHN123456789',
-      userId: 'HD001',
-      origin: 'Shenzhen, Chine',
-      destination: 'Lagos, Nigeria',
-      status: 'in-transit',
-      transportType: 'maritime',
-      estimatedDelivery: '2024-08-15',
-      currentLocation: 'Port de Cotonou'
-    },
-    {
-      id: '2',
-      trackingNumber: 'CHN987654321',
-      userId: 'HD002',
-      origin: 'Guangzhou, Chine',
-      destination: 'Abidjan, Côte d\'Ivoire',
-      status: 'customs',
-      transportType: 'aerien',
-      estimatedDelivery: '2024-07-20',
-      currentLocation: 'Douanes Abidjan'
-    }
   ];
 
   const getStatusBadge = (status: 'pending' | 'in-transit' | 'customs' | 'delivered') => {
