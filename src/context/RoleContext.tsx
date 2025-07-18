@@ -62,7 +62,8 @@ const dashboardRoutes: Record<Role, string> = {
 export const RoleProvider = ({ children }: RoleProviderProps) => {
   const { userData, isAuthenticated } = useAuth();
   
-  const role = userData?.role || null;
+  // Correction ici : on utilise userData.userType
+  const role = userData?.userType || null;
   const permissions = role ? rolePermissions[role] : rolePermissions.user;
   
   const hasPermission = (action: keyof Permission): boolean => {

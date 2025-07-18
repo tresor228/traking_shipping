@@ -2,6 +2,8 @@
 import type { Metadata } from "next";
 import { GeistSans, GeistMono } from "geist/font";
 import "./globals.css";
+import { AuthProvider } from "@/context/authContext";
+import { RoleProvider } from "@/context/RoleContext";
 
 export const metadata: Metadata = {
   title: "Mon Application Next.js",
@@ -16,7 +18,11 @@ export default function RootLayout({
   return (
     <html lang="fr" className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <body className="min-h-screen bg-background text-foreground antialiased">
-        {children}
+        <AuthProvider>
+          <RoleProvider>
+            {children}
+          </RoleProvider>
+        </AuthProvider>
       </body>
     </html>
   );

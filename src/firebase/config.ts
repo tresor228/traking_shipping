@@ -29,6 +29,8 @@ const app = getApps().length > 0 ? getApps()[0] : initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
-export const messaging = getMessaging(app);
+
+// Initialisation de la messagerie uniquement côté client
+export const messaging = (typeof window !== "undefined") ? getMessaging(app) : null;
 
 export default app;
