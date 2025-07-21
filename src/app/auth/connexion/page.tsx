@@ -21,7 +21,7 @@ interface FormErrors {
 
 export default function Connexion() {
   const router = useRouter();
-  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { isAuthenticated, loading: authLoading, refreshUserData } = useAuth();
   const { getDashboardRoute } = useRole();
   
   const [credentials, setCredentials] = useState<LoginCredentials>({
@@ -31,7 +31,6 @@ export default function Connexion() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [resetEmail, setResetEmail] = useState("");
 
-  // Redirection si déjà connecté
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
       router.push(getDashboardRoute());
@@ -105,10 +104,13 @@ export default function Connexion() {
     
     try {
       const email = await getEmailFromIdentifier(credentials.identifier);
-      
       await signInWithEmailAndPassword(email, credentials.password);
       
-      // La redirection sera gérée par l'useEffect
+      // Après connexion, on force la mise à jour du contexte utilisateur
+      if (typeof refreshUserData === 'function') {
+        await refreshUserData();
+      }
+      router.push(getDashboardRoute());
     } catch (error: unknown) {
       console.error("Erreur de connexion:", error);
       
@@ -125,6 +127,8 @@ export default function Connexion() {
             errorMessage = "Mot de passe incorrect";
           } else if (code === "auth/user-disabled") {
             errorMessage = "Ce compte a été désactivé";
+          } else if (code === "auth/invalid-credential") {
+            errorMessage = "Identifiants invalides. Vérifiez l'email ou le mot de passe.";
           }
         }
       }

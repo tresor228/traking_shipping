@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect } from "react";
 import { useAuth } from "@/context/authContext";
 import { useRouter } from "next/navigation";
@@ -12,7 +14,9 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     }
   }, [isAuthenticated, loading, router]);
 
-  if (loading) return <div>Chargement...</div>;
-  if (!isAuthenticated) return null;
+  console.log('PROTECTED ROUTE - isAuthenticated:', isAuthenticated, 'loading:', loading);
+
+  if (loading) return <div style={{textAlign:'center',marginTop:'2rem'}}>Chargement de la session...</div>;
+  if (!isAuthenticated) return <div style={{textAlign:'center',marginTop:'2rem'}}>Redirection...</div>;
   return <>{children}</>;
 }

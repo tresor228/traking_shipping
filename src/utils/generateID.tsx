@@ -8,3 +8,8 @@ export function formatDate(date: Date): string {
   }).format(date);
   
 }
+
+export function generateTrackingId() {
+  const randomNumber = Math.floor(100 + Math.random() * 900); // nombre entre 100 et 999
+  return `HD${randomNumber}`;
+}

@@ -105,7 +105,7 @@ export async function getUserData(uid: string): Promise<UserData | null> {
 
 // Générer un ID de suivi unique
 function generateTrackingId(): string {
-  const prefix = 'TRK';
+  const prefix = 'HD';
   const timestamp = Date.now().toString().slice(-6);
   const random = Math.random().toString(36).substring(2, 6).toUpperCase();
   return `${prefix}${timestamp}${random}`;

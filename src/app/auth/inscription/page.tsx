@@ -86,12 +86,6 @@ export default function Inscription() {
     confirmPassword: "",
   });
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.push("/user/dashboard");
-    }
-  }, [isAuthenticated, router]);
-
   // Fonction pour calculer la force du mot de passe
   const calculatePasswordStrength = (password: string): PasswordStrength => {
     if (!password) return { score: 0, label: "", color: "" };
@@ -147,11 +141,12 @@ export default function Inscription() {
     }
     
     // Regex améliorée pour les numéros français
-    const phoneRegex = /^(?:\+33|0033|0)[1-9](?:[0-9]{8})$/;
+    // Nouvelle regex : exactement 8 chiffres, pas d'indicatif
+    const phoneRegex = /^\d{8}$/;
     if (!formData.telephone.trim()) {
       newErrors.telephone = "Le téléphone est requis";
     } else if (!phoneRegex.test(formData.telephone.replace(/\s/g, ''))) {
-      newErrors.telephone = "Format de téléphone invalide (ex: +33 1 23 45 67 89)";
+      newErrors.telephone = "Format de téléphone invalide (ex: 99779977)";
     }
     
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

@@ -1,9 +1,25 @@
+"use client";
 import React, { useState, useEffect, useRef } from 'react';
-import { getPackagesByUserTrackingId, createPackage, getTrackingHistory, updatePackage, deletePackage } from '../../firebase/firestore';
-import { useAuth } from '../../context/authContext'; // On suppose qu'il existe un contexte d'auth
+import { getPackagesByUserTrackingId, createPackage, getTrackingHistory, updatePackage, deletePackage } from '../../../firebase/firestore';
+import { useAuth } from '../../../context/authContext';
+import ProtectedRoute from "@/routes/protectedRoute";
+import { useRouter } from 'next/navigation';
 
-export default function Dashboard() {
-  const { user, userData } = useAuth(); // userData doit contenir trackingId
+function DashboardContent() {
+  const { user, userData, signOut } = useAuth();
+  const router = useRouter();
+  // Ajout de logs pour le debug
+  console.log('DASHBOARD user:', user);
+  console.log('DASHBOARD userData:', userData);
+  if (!user) {
+    return <div style={{color:'red',textAlign:'center',marginTop:'2rem'}}>Erreur : utilisateur non connecté (user null)</div>;
+  }
+  if (!userData) {
+    return <div style={{color:'red',textAlign:'center',marginTop:'2rem'}}>Erreur : données utilisateur non chargées (userData null)</div>;
+  }
+  if (!userData.userType || userData.userType !== 'user') {
+    return <div style={{color:'red',textAlign:'center',marginTop:'2rem'}}>Erreur : type d'utilisateur incorrect ou absent ({String(userData.userType)})</div>;
+  }
   const [packages, setPackages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +41,6 @@ export default function Dashboard() {
   const [historyError, setHistoryError] = useState<string | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
 
-  // Focus auto sur le formulaire
   useEffect(() => {
     if (showModal && modalRef.current) {
       const input = modalRef.current.querySelector('input, select, textarea') as HTMLElement;
@@ -33,7 +48,6 @@ export default function Dashboard() {
     }
   }, [showModal]);
 
-  // Feedback visuel temporaire
   useEffect(() => {
     if (formSuccess || formError) {
       const timer = setTimeout(() => {
@@ -44,7 +58,6 @@ export default function Dashboard() {
     }
   }, [formSuccess, formError]);
 
-  // Récupération des colis utilisateur
   useEffect(() => {
     if (!userData || !userData.trackingId) return;
     setLoading(true);
@@ -59,13 +72,11 @@ export default function Dashboard() {
       });
   }, [userData?.trackingId]);
 
-  // Gestion du formulaire
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Ouvre le modal d'édition
   const handleEdit = (pkg: any) => {
     setForm({
       trackingNumber: pkg.trackingNumber,
@@ -78,7 +89,6 @@ export default function Dashboard() {
     setShowModal(true);
   };
 
-  // Suppression de colis
   const handleDelete = async (id: string) => {
     if (!window.confirm('Voulez-vous vraiment supprimer ce colis ?')) return;
     setFormLoading(true);
@@ -100,7 +110,6 @@ export default function Dashboard() {
     }
   };
 
-  // Soumission du formulaire (ajout ou édition)
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormLoading(true);
@@ -118,14 +127,12 @@ export default function Dashboard() {
     }
     try {
       if (editId) {
-        // Edition
         await updatePackage(editId, {
           ...form,
           transportType: form.transportType as 'maritime' | 'aerien',
         });
         setFormSuccess('Colis modifié avec succès !');
       } else {
-        // Ajout
         await createPackage({
           ...form,
           userTrackingId: userData.trackingId,
@@ -154,7 +161,6 @@ export default function Dashboard() {
     }
   };
 
-  // Ouvre le modal de détail et charge l'historique
   const handleShowDetails = async (pkg: any) => {
     setSelectedPackage(pkg);
     setHistoryLoading(true);
@@ -170,20 +176,32 @@ export default function Dashboard() {
     }
   };
 
-  // Ferme le modal de détail
   const handleCloseDetails = () => {
     setSelectedPackage(null);
     setTrackingHistory([]);
     setHistoryError(null);
   };
 
+  // Ajout de la fonction de déconnexion
+  const handleLogout = async () => {
+    await signOut();
+    router.push('/auth/connexion');
+  };
+
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-bold mb-4">Tableau de bord utilisateur</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Tableau de bord utilisateur</h1>
+        <button
+          onClick={handleLogout}
+          className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
+        >
+          Déconnexion
+        </button>
+      </div>
       {loading && <div>Chargement...</div>}
       {error && <div className="text-red-600 mb-2">{error}</div>}
       <button className="bg-blue-600 text-white px-4 py-2 rounded mb-4" onClick={() => setShowModal(true)} disabled={formLoading}>Ajouter un colis</button>
-      {/* Modal d'ajout/édition de colis */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
           <div ref={modalRef} className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md relative">
@@ -205,7 +223,6 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-      {/* Liste des colis */}
       <div className="mt-6">
         {packages.length === 0 && !loading && <div>Aucun colis pour l’instant.</div>}
         <ul className="space-y-4">
@@ -233,7 +250,6 @@ export default function Dashboard() {
           ))}
         </ul>
       </div>
-      {/* Modal de détails colis */}
       {selectedPackage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
           <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-lg relative">
@@ -270,3 +286,11 @@ export default function Dashboard() {
     </div>
   );
 }
+
+export default function Dashboard() {
+  return (
+    <ProtectedRoute>
+      <DashboardContent />
+    </ProtectedRoute>
+  );
+} 
